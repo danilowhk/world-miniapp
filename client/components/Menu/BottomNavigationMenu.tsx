@@ -30,12 +30,6 @@ export default function BottomNavigationMenu() {
         onClick={() => handleNavigation("chat", "/chat")}
       />
       <MenuButton
-        icon={<FaBook size={24} />}
-        label="Lessons"
-        isActive={activeTab === "lessons"}
-        onClick={() => handleNavigation("lessons", "/lessons")}
-      />
-      <MenuButton
         icon={<FaTrophy size={24} />}
         label="Ranking"
         isActive={activeTab === "ranking"}
