@@ -5,6 +5,7 @@ import { Message } from '../types/chat';
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageIdCounter = useRef(0);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString([], {
@@ -15,37 +16,20 @@ export const useChat = () => {
 
   const addMessage = async (text: string, speaker: "You" | "Emma") => {
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: `${speaker}-${messageIdCounter.current++}-${Date.now()}`,
       text,
       speaker,
       timestamp: getCurrentTime(),
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     return newMessage;
-  };
-
-  const getAIResponse = async (userMessage: string) => {
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      if (!response.ok) throw new Error("Failed to get AI response");
-      return await response.json();
-    } catch (error) {
-      console.error("Error getting AI response:", error);
-      return { text: "I'm sorry, I couldn't process that right now." };
-    }
   };
 
   return {
     messages,
     messagesEndRef,
     addMessage,
-    getAIResponse,
     getCurrentTime
   };
 };

@@ -1,4 +1,12 @@
-export interface Message {
+// src/types/chat.ts
+
+export interface InitializationState {
+    audioInitialized: boolean;
+    welcomeMessageSent: boolean;
+    error: string | null;
+  }
+  
+  export interface Message {
     id: string;
     text: string;
     speaker: "You" | "Emma";

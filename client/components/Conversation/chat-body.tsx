@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { User, Languages, RotateCw, Mic, Volume2, VolumeX } from "lucide-react";
+import React, { useEffect, useCallback } from "react";
+import { User, Mic, Volume2, VolumeX } from "lucide-react";
 import { useAudio } from "@/hooks/useAudio";
 import { useChat } from "@/hooks/useChat";
 import { useRecording } from "@/hooks/useRecording";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { initializeAudioContext } from "@/services/audio";
+import { useTimer } from "@/hooks/useTimer";
 
 export default function ChatBody() {
   const {
@@ -25,6 +26,39 @@ export default function ChatBody() {
     addMessage,
     getCurrentTime
   } = useChat();
+
+  const handleTimeLimit = useCallback(() => {
+    console.log('Time limit reached!');
+    // Create conversation summary
+    const conversationData = {
+      id: Date.now().toString(),
+      messages,
+      startTime: messages[0]?.timestamp || new Date().toISOString(),
+      endTime: new Date().toISOString(),
+      duration: 180,
+      totalMessages: messages.length,
+      userMessages: messages.filter(m => m.speaker === "You").length,
+      assistantMessages: messages.filter(m => m.speaker === "Emma").length
+    };
+
+    console.log('=== Conversation Summary ===');
+    console.log('Conversation ID:', conversationData.id);
+    console.log('Start Time:', conversationData.startTime);
+    console.log('End Time:', conversationData.endTime);
+    console.log('Duration:', conversationData.duration, 'seconds');
+    console.log('Total Messages:', conversationData.totalMessages);
+    console.log('User Messages:', conversationData.userMessages);
+    console.log('Assistant Messages:', conversationData.assistantMessages);
+    console.log('\n=== Full Conversation Log ===');
+    messages.forEach((msg) => {
+      console.log(`[${msg.timestamp}] ${msg.speaker}: ${msg.text}`);
+    });
+    console.log('=== End of Conversation ===\n');
+
+    alert("Time limit reached! Check console for conversation data.");
+  }, [messages]);
+
+  const { formatTime, startTimer, stopTimer, resetTimer, isActive, time } = useTimer(10, handleTimeLimit); // Changed to 10 seconds for testing
 
   const { handleChatFlow } = useChatFlow(
     async (text: string, speaker: "You" | "Emma") => {
@@ -47,27 +81,38 @@ export default function ChatBody() {
   // Combined initialization useEffect
   useEffect(() => {
     const init = async () => {
-      // Initialize audio context
+      console.log('Initializing...');
       const audioContext = initializeAudioContext();
       if (!audioContext) {
         console.warn("Audio might not work in this WebView environment");
       }
       
-      // Initialize audio
       await initializeAudio();
 
-      // Add welcome message if needed
       if (messages.length === 0) {
+        console.log('Adding welcome message...');
         const welcomeMessage = "Hello! I'm Emma, your AI assistant. How can I help you today?";
-        const message = await addMessage(welcomeMessage, "Emma");
+        await addMessage(welcomeMessage, "Emma");
         await playAudio(welcomeMessage);
       }
     };
 
     init();
-  }, []); // Empty dependency array since this should only run once
+  }, [initializeAudio, messages.length, addMessage, playAudio]);
 
-  // Auto-scroll effect (can't be combined as it needs to run on messages change)
+  // Start timer when welcome message is added
+  useEffect(() => {
+    console.log('Messages length:', messages.length);
+    console.log('Timer active:', isActive);
+    console.log('Current time:', time);
+
+    if (messages.length === 0 && !isActive) {
+      console.log('Starting timer...');
+      startTimer();
+    }
+  }, [messages.length, isActive, startTimer, time]);
+
+  // Auto-scroll effect
   useEffect(() => {
     const element = messagesEndRef.current;
     if (element) {
@@ -85,13 +130,18 @@ export default function ChatBody() {
     }
   };
 
+  // Debug render
+  console.log('Render - Timer status:', { isActive, time, messagesLength: messages.length });
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-gray-700 to-gray-900">
-      {/* Header */}
+      {/* Header with Timer */}
       <div className="flex items-center p-4 text-white">
         <div className="text-sm">{getCurrentTime()}</div>
         <div className="flex-grow"></div>
-        <div className="flex items-center gap-2"></div>
+        <div className="text-sm font-mono bg-gray-800 px-3 py-1 rounded-full">
+          {formatTime()} {isActive ? '●' : '○'}
+        </div>
       </div>
 
       {/* Navigation */}
@@ -183,15 +233,6 @@ export default function ChatBody() {
 
       {/* Bottom Controls */}
       <div className="flex justify-around items-center p-6">
-        {/* <button className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-          <User className="text-white w-6 h-6" />
-        </button>
-        <button className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-          <Languages className="text-white w-6 h-6" />
-        </button>
-        <button className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-          <RotateCw className="text-white w-6 h-6" />
-        </button> */}
         <button
           onClick={handleToggleRecording}
           className={`w-12 h-12 rounded-full flex items-center justify-center ${
