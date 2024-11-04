@@ -22,12 +22,22 @@ export default function RootLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !localStorage.getItem("isLoggedIn") &&
-      pathname !== "/login"
-    ) {
-      router.push("/login");
+    if (typeof window !== "undefined") {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const onboardingComplete = localStorage.getItem("onboardingComplete");
+
+      // Redirect to login if not logged in
+      if (!isLoggedIn && pathname !== "/login") {
+        router.push("/login");
+      }
+      // Only redirect to onboarding if it's not completed and we're not already in onboarding
+      else if (
+        !onboardingComplete &&
+        !pathname.startsWith("/onboarding") &&
+        pathname !== "/login"
+      ) {
+        router.push("/onboarding/language");
+      }
     }
   }, [pathname, router]);
 
