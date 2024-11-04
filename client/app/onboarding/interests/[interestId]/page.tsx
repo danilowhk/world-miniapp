@@ -98,8 +98,10 @@ export default function SubInterestsSelection() {
         JSON.stringify(section.subInterests)
       );
     });
+    // Set onboarding complete flag
+    localStorage.setItem("onboardingComplete", "true");
     // Navigate to the main page after completion
-    router.push("/"); // Redirect to the main home page
+    router.push("/");
   };
 
   const getInterestName = (id: string) => {
