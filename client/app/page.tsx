@@ -3,26 +3,21 @@
 import { useState, useEffect } from "react";
 
 export default function Home() {
-  const coinBalance = 150;
-  const wordOfTheDay = "Perseverance";
-  const wordMeaning =
-    "Persistence in doing something despite difficulty or delay in achieving success.";
-
-  // Mock next reward time - you should replace this with actual logic
+  const [mounted, setMounted] = useState(false);
+  const [coinBalance] = useState(150);
   const [timeLeft, setTimeLeft] = useState({
     hours: 23,
     minutes: 45,
     seconds: 30,
   });
 
-  // Calculate progress percentage (inverted, as time passes)
-  const progressPercentage =
-    100 -
-    ((timeLeft.hours * 3600 + timeLeft.minutes * 60 + timeLeft.seconds) /
-      (24 * 3600)) *
-      100;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev.hours === 0 && prev.minutes === 0 && prev.seconds === 0) {
@@ -47,7 +42,23 @@ export default function Home() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [mounted]);
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
+
+  // Calculate progress percentage
+  const progressPercentage =
+    100 -
+    ((timeLeft.hours * 3600 + timeLeft.minutes * 60 + timeLeft.seconds) /
+      (24 * 3600)) *
+      100;
+
+  const wordOfTheDay = "Perseverance";
+  const wordMeaning =
+    "Persistence in doing something despite difficulty or delay in achieving success.";
 
   return (
     <main className="min-h-screen bg-white px-4 py-4">
