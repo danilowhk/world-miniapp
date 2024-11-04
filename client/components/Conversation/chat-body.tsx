@@ -368,20 +368,20 @@ export default function ChatBody() {
                     }`}
                   >
                     <div className="text-xl">{message.text}</div>
-                    <div className="flex gap-1 mt-2">
-                      <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <Languages className="text-white w-4 h-4" />
-                      </button>
-                      <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <RotateCw className="text-white w-4 h-4" />
-                      </button>
-                      <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                        <Snail className="text-white w-4 h-4" />
-                      </button>
-                    </div>
-                    {/* Timestamp in the bottom right corner */}
-                    <div className="flex justify-end mt-2 text-xs text-gray-400">
-                      {message.timestamp}
+                    {/* Bottom row for buttons and timestamp */}
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="flex gap-1">
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                          <Languages className="text-white w-4 h-4" />
+                        </button>
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                          <RotateCw className="text-white w-4 h-4" />
+                        </button>
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                          <Snail className="text-white w-4 h-4" />
+                        </button>
+                      </div>
+                      <span className="text-xs text-gray-400">{message.timestamp}</span>
                     </div>
                   </div>
                 </div>
@@ -413,15 +413,6 @@ export default function ChatBody() {
 
       {/* Bottom Controls */}
       <div className="flex justify-around items-center p-6">
-        {/* <button className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-          <User className="text-white w-6 h-6" />
-        </button>
-        <button className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-          <Languages className="text-white w-6 h-6" />
-        </button>
-        <button className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-          <RotateCw className="text-white w-6 h-6" />
-        </button> */}
         <button
           onClick={handleToggleRecording}
           className={`w-12 h-12 rounded-full flex items-center justify-center ${
