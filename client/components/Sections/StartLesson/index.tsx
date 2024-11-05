@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react';
-import { BadgePlus, TimerReset } from 'lucide-react';
-import { LessonsHeader } from './lessons-header';
+import { useEffect, useState } from "react";
+import { BadgePlus, TimerReset } from "lucide-react";
+import { LessonsHeader } from "./lessons-header";
 
 export default function LessonsSection() {
-  const [dayOfWeek, setDayOfWeek] = useState('');
+  const [dayOfWeek, setDayOfWeek] = useState("");
 
   useEffect(() => {
     const date = new Date();
-    const options: Intl.DateTimeFormatOptions = { weekday: 'long' }; // Use 'long' for the full name of the day
-    setDayOfWeek(date.toLocaleDateString('en-US', options));
+    const options: Intl.DateTimeFormatOptions = { weekday: "long" }; // Use 'long' for the full name of the day
+    setDayOfWeek(date.toLocaleDateString("en-US", options));
   }, []);
 
   return (
-    <div className="flex flex-col justify-between relative isolate overflow-hidden bg-gray-900 h-full px-6 py-4 text-center shadow-2xl"> {/* Updated classes */}
+    <div className="flex flex-col justify-between relative isolate overflow-hidden bg-gray-900 h-full px-6 py-4 text-center shadow-2xl">
+      {" "}
+      {/* Updated classes */}
       <LessonsHeader />
-
       <div className="flex flex-col justify-center items-center">
         <div className="pt-4 pb-4">
           <BadgePlus size={52} className="text-white" />
@@ -35,19 +36,25 @@ export default function LessonsSection() {
           </a>
         </div>
       </div>
-
       {/* Rounded box for the end time at the bottom */}
-      <div className="mt-4 rounded-lg bg-white p-4 mb-6 text-gray-900"> {/* Added mb-6 for spacing */}
+      <div className="mt-4 rounded-lg bg-white p-4 mb-20 text-gray-900">
+        {" "}
+        {/* Added mb-20 for spacing */}
         <TimerReset size={24} className="inline-block mr-2 text-gray-900" />
         Ends on {dayOfWeek} at 11:59PM UTC
       </div>
-
       <svg
         viewBox="0 0 1024 1024"
         aria-hidden="true"
         className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]"
       >
-        <circle r={512} cx={512} cy={512} fill="url(#827591b1-ce8c-4110-b064-7cb85a0b1217)" fillOpacity="0.7" />
+        <circle
+          r={512}
+          cx={512}
+          cy={512}
+          fill="url(#827591b1-ce8c-4110-b064-7cb85a0b1217)"
+          fillOpacity="0.7"
+        />
         <defs>
           <radialGradient id="827591b1-ce8c-4110-b064-7cb85a0b1217">
             <stop stopColor="#7775D6" />

@@ -1,317 +1,149 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { User, Languages, RotateCw, Mic, Volume2, VolumeX, Snail } from "lucide-react";
-
-interface Message {
-  id: string;
-  text: string;
-  speaker: "You" | "Emma";
-  timestamp: string;
-}
+import React, { useEffect, useCallback } from "react";
+import { User, Mic, Volume2, VolumeX } from "lucide-react";
+import { useAudio } from "@/hooks/useAudio";
+import { useChat } from "@/hooks/useChat";
+import { useRecording } from "@/hooks/useRecording";
+import { useChatFlow } from "@/hooks/useChatFlow";
+import { initializeAudioContext } from "@/services/audio";
+import { useTimer } from "@/hooks/useTimer";
 
 export default function ChatBody() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingComplete, setRecordingComplete] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const {
+    audioState,
+    setAudioState,
+    mediaRecorderRef,
+    audioChunksRef,
+    playAudio,
+    toggleMute,
+    initializeAudio
+  } = useAudio();
 
-  // Initialize audio element and add welcome message
-  useEffect(() => {
-    // Initialize audio with WebView-friendly settings
-    audioRef.current = new Audio();
-    audioRef.current.crossOrigin = "anonymous";
-    audioRef.current.preload = "auto";
+  const {
+    messages,
+    messagesEndRef,
+    addMessage,
+    getCurrentTime
+  } = useChat();
 
-    audioRef.current.onplay = () => setIsSpeaking(true);
-    audioRef.current.onended = () => setIsSpeaking(false);
-    audioRef.current.onerror = (e) => {
-      console.error("Audio error:", e);
-      setIsSpeaking(false);
+  const handleTimeLimit = useCallback(() => {
+    console.log('Time limit reached!');
+    // Create conversation summary
+    const conversationData = {
+      id: Date.now().toString(),
+      messages,
+      startTime: messages[0]?.timestamp || new Date().toISOString(),
+      endTime: new Date().toISOString(),
+      duration: 180,
+      totalMessages: messages.length,
+      userMessages: messages.filter(m => m.speaker === "You").length,
+      assistantMessages: messages.filter(m => m.speaker === "Emma").length
     };
 
-    if (messages.length === 0) {
-      const welcomeMessage =
-        "Hello! I'm Emma, your AI assistant. How can I help you today?";
-      addMessage(welcomeMessage, "Emma");
-    }
+    console.log('=== Conversation Summary ===');
+    console.log('Conversation ID:', conversationData.id);
+    console.log('Start Time:', conversationData.startTime);
+    console.log('End Time:', conversationData.endTime);
+    console.log('Duration:', conversationData.duration, 'seconds');
+    console.log('Total Messages:', conversationData.totalMessages);
+    console.log('User Messages:', conversationData.userMessages);
+    console.log('Assistant Messages:', conversationData.assistantMessages);
+    console.log('\n=== Full Conversation Log ===');
+    messages.forEach((msg) => {
+      console.log(`[${msg.timestamp}] ${msg.speaker}: ${msg.text}`);
+    });
+    console.log('=== End of Conversation ===\n');
 
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.onplay = null;
-        audioRef.current.onended = null;
-        audioRef.current.onerror = null;
-      }
-    };
-  }, []);
-
-  // Auto-scroll to latest message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    alert("Time limit reached! Check console for conversation data.");
   }, [messages]);
 
-  const getCurrentTime = () => {
-    return new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const { formatTime, startTimer, stopTimer, resetTimer, isActive, time } = useTimer(10, handleTimeLimit); // Changed to 10 seconds for testing
 
-  const playAudio = async (text: string) => {
-    if (!isMuted) {
-      try {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
-
-        const response = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        });
-
-        if (!response.ok) throw new Error("Failed to generate speech");
-
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        if (!audioRef.current) {
-          audioRef.current = new Audio();
-        }
-
-        // Configure audio for WebView
-        audioRef.current.crossOrigin = "anonymous";
-        audioRef.current.preload = "auto";
-        audioRef.current.src = audioUrl;
-
-        // Enable play in WebView
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsSpeaking(true);
-            })
-            .catch((error) => {
-              console.error("Audio playback failed:", error);
-              setIsSpeaking(false);
-            });
-        }
-      } catch (error) {
-        console.error("Error playing audio:", error);
-        setIsSpeaking(false);
+  const { handleChatFlow } = useChatFlow(
+    async (text: string, speaker: "You" | "Emma") => {
+      const message = await addMessage(text, speaker);
+      if (speaker === "Emma") {
+        await playAudio(text);
       }
-    }
-  };
+    },
+    setAudioState,
+    playAudio
+  );
+  
+  const { startRecording, stopRecording } = useRecording(
+    mediaRecorderRef,
+    audioChunksRef,
+    setAudioState,
+    handleChatFlow
+  );
 
-  const addMessage = async (text: string, speaker: "You" | "Emma") => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      speaker,
-      timestamp: getCurrentTime(),
+  // Combined initialization useEffect
+  useEffect(() => {
+    const init = async () => {
+      console.log('Initializing...');
+      const audioContext = initializeAudioContext();
+      if (!audioContext) {
+        console.warn("Audio might not work in this WebView environment");
+      }
+      
+      await initializeAudio();
+
+      if (messages.length === 0) {
+        console.log('Adding welcome message...');
+        const welcomeMessage = "Hello! I'm Emma, your AI assistant. How can I help you today?";
+        await addMessage(welcomeMessage, "Emma");
+        await playAudio(welcomeMessage);
+      }
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    init();
+  }, [initializeAudio, messages.length, addMessage, playAudio]);
 
-    if (speaker === "Emma") {
-      await playAudio(text);
+  // Start timer when welcome message is added
+  useEffect(() => {
+    console.log('Messages length:', messages.length);
+    console.log('Timer active:', isActive);
+    console.log('Current time:', time);
+
+    if (messages.length === 0 && !isActive) {
+      console.log('Starting timer...');
+      startTimer();
     }
-  };
+  }, [messages.length, isActive, startTimer, time]);
 
-  const toggleMute = () => {
-    if (isSpeaking && !isMuted && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+  // Auto-scroll effect
+  useEffect(() => {
+    const element = messagesEndRef.current;
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
     }
-    setIsMuted(!isMuted);
-  };
-
-  const getAIResponse = async (userMessage: string) => {
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      if (!response.ok) throw new Error("Failed to get AI response");
-
-      const data = await response.json();
-      await addMessage(data.text, "Emma");
-    } catch (error) {
-      console.error("Error getting AI response:", error);
-      await addMessage("I'm sorry, I couldn't process that right now.", "Emma");
-    }
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 44100,
-        },
-      });
-
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.start(100);
-      setIsRecording(true);
-      setRecordingComplete(false);
-      setTranscript("");
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
-      alert("Error accessing microphone. Please check your device settings.");
-    }
-  };
-
-  const stopRecording = async () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setIsProcessing(true);
-
-      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-      const formData = new FormData();
-      formData.append("audio", audioBlob);
-
-      try {
-        const response = await fetch("/api/stt", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) throw new Error("Failed to transcribe audio");
-
-        const { text } = await response.json();
-        await handleChatFlow(text);
-      } catch (error) {
-        console.error("Error in transcription:", error);
-        setIsProcessing(false);
-      }
-
-      // Clear the audio chunks
-      audioChunksRef.current = [];
-    }
-  };
-
-  const transcribeAudio = async (audioBlob: Blob) => {
-    const formData = new FormData();
-    formData.append("audio", audioBlob, "audio.wav");
-
-    try {
-      const response = await fetch("/api/stt", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-
-      setTranscript(data.text);
-      await addMessage(data.text, "You");
-      await getAIResponse(data.text);
-    } catch (error) {
-      console.error("Error in transcription:", error);
-      setTranscript("Error transcribing audio. Please try again.");
-    }
-  };
+  }, [messages]);
 
   const handleToggleRecording = () => {
-    if (isSpeaking) return; // Prevent recording while AI is speaking
+    if (audioState.isSpeaking) return;
 
-    if (isRecording) {
+    if (audioState.isRecording) {
       stopRecording();
     } else {
       startRecording();
     }
   };
 
-  const handleChatFlow = async (userMessage: string) => {
-    // Add user message to chat
-    await addMessage(userMessage, "You");
-
-    setIsProcessing(true);
-    try {
-      // Get AI response
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      if (!response.ok) throw new Error("Failed to get AI response");
-
-      const data = await response.json();
-      await addMessage(data.text, "Emma");
-    } catch (error) {
-      console.error("Error in chat flow:", error);
-      addMessage("I'm sorry, I couldn't process that request.", "Emma");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const initializeAudioContext = () => {
-    try {
-      const AudioContext =
-        window.AudioContext || (window as any).webkitAudioContext;
-      const audioContext = new AudioContext();
-
-      // Resume audio context on user interaction
-      document.addEventListener(
-        "touchstart",
-        () => {
-          if (audioContext.state === "suspended") {
-            audioContext.resume();
-          }
-        },
-        { once: true }
-      );
-
-      return audioContext;
-    } catch (error) {
-      console.error("WebView AudioContext initialization failed:", error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    const audioContext = initializeAudioContext();
-    if (!audioContext) {
-      console.warn("Audio might not work in this WebView environment");
-    }
-  }, []);
+  // Debug render
+  console.log('Render - Timer status:', { isActive, time, messagesLength: messages.length });
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-gray-700 to-gray-900">
-      {/* Header */}
-      {/* <div className="flex items-center p-4 text-white">
+
+      {/* Header with Timer */}
+      <div className="flex items-center p-4 text-white">
         <div className="text-sm">{getCurrentTime()}</div>
         <div className="flex-grow"></div>
-        <div className="flex items-center gap-2"></div>
-      </div> */}
+        <div className="text-sm font-mono bg-gray-800 px-3 py-1 rounded-full">
+          {formatTime()} {isActive ? '●' : '○'}
+        </div>
+      </div>
 
       {/* Navigation */}
       <div className="flex items-center px-4 text-white">
@@ -321,9 +153,9 @@ export default function ChatBody() {
         <button
           onClick={toggleMute}
           className="p-2 hover:bg-gray-600 rounded-full transition-colors"
-          title={isMuted ? "Unmute" : "Mute"}
+          title={audioState.isMuted ? "Unmute" : "Mute"}
         >
-          {isMuted ? (
+          {audioState.isMuted ? (
             <VolumeX className="w-6 h-6" />
           ) : (
             <Volume2 className="w-6 h-6" />
@@ -334,22 +166,8 @@ export default function ChatBody() {
 
       {/* Main Content */}
       <div className="flex flex-col items-center pt-6 text-white">
-        {/* Profile Image */}
-        {/* <div className="w-20 h-20 rounded-full bg-gray-600 overflow-hidden mb-4 flex items-center justify-center">
-          <User className="w-12 h-12 text-gray-300" />
-        </div> */}
-
-        {/* Name and Status */}
-        {/* <div className="text-2xl font-medium mb-1">Emma</div>
-        <div className="text-gray-400 mb-4 flex items-center gap-2">
-          {isSpeaking && (
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Speaking</span>
-            </div>
-          )}
-          {!isSpeaking && "AI Assistant"}
-        </div> */}
+          {!audioState.isSpeaking && "AI Assistant"}
+        </div>
 
         {/* Messages Section */}
         <div className="w-full flex-grow overflow-y-auto px-4 pb-4">
@@ -390,7 +208,7 @@ export default function ChatBody() {
             </div>
 
             {/* Status Indicators */}
-            {isRecording && (
+            {audioState.isRecording && (
               <div className="flex items-center justify-center mt-4 text-gray-400">
                 <div className="animate-pulse flex items-center gap-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -399,7 +217,7 @@ export default function ChatBody() {
               </div>
             )}
 
-            {isProcessing && (
+            {audioState.isProcessing && (
               <div className="flex items-center justify-center mt-4 text-gray-400">
                 <div className="animate-pulse flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -416,9 +234,9 @@ export default function ChatBody() {
         <button
           onClick={handleToggleRecording}
           className={`w-12 h-12 rounded-full flex items-center justify-center ${
-            isRecording ? "bg-red-600" : "bg-blue-600"
-          } ${isSpeaking ? "opacity-50 cursor-not-allowed" : ""}`}
-          disabled={isSpeaking}
+            audioState.isRecording ? "bg-red-600" : "bg-blue-600"
+          } ${audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""}`}
+          disabled={audioState.isSpeaking}
         >
           <Mic className="text-white w-6 h-6" />
         </button>
