@@ -135,6 +135,7 @@ export default function ChatBody() {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-gray-700 to-gray-900">
+
       {/* Header with Timer */}
       <div className="flex items-center p-4 text-white">
         <div className="text-sm">{getCurrentTime()}</div>
@@ -165,20 +166,6 @@ export default function ChatBody() {
 
       {/* Main Content */}
       <div className="flex flex-col items-center pt-6 text-white">
-        {/* Profile Image */}
-        <div className="w-20 h-20 rounded-full bg-gray-600 overflow-hidden mb-4 flex items-center justify-center">
-          <User className="w-12 h-12 text-gray-300" />
-        </div>
-
-        {/* Name and Status */}
-        <div className="text-2xl font-medium mb-1">Emma</div>
-        <div className="text-gray-400 mb-4 flex items-center gap-2">
-          {audioState.isSpeaking && (
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Speaking</span>
-            </div>
-          )}
           {!audioState.isSpeaking && "AI Assistant"}
         </div>
 
@@ -193,16 +180,27 @@ export default function ChatBody() {
                     message.speaker === "You" ? "items-end" : "items-start"
                   }`}
                 >
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <span>{message.speaker}</span>
-                    <span>{message.timestamp}</span>
-                  </div>
                   <div
                     className={`mt-1 px-4 py-2 rounded-lg max-w-[80%] ${
-                      message.speaker === "You" ? "bg-blue-600" : "bg-gray-600"
+                      message.speaker === "You" ? "bg-green-500 text-white rounded-br-none" : "bg-gray-200 text-gray-900 rounded-tl-none"
                     }`}
                   >
-                    {message.text}
+                    <div className="text-xl">{message.text}</div>
+                    {/* Bottom row for buttons and timestamp */}
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="flex gap-1">
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                          <Languages className="text-white w-4 h-4" />
+                        </button>
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                          <RotateCw className="text-white w-4 h-4" />
+                        </button>
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                          <Snail className="text-white w-4 h-4" />
+                        </button>
+                      </div>
+                      <span className="text-xs text-gray-400">{message.timestamp}</span>
+                    </div>
                   </div>
                 </div>
               ))}
