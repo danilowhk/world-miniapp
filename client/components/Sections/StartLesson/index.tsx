@@ -1,8 +1,10 @@
+'use client'
+
 import { useEffect, useState } from "react";
 import { BadgePlus, TimerReset } from "lucide-react";
 import { LessonsHeader } from "./lessons-header";
 
-export default function LessonsSection() {
+export default function LessonsSection({ lessons }: any) {
   const [dayOfWeek, setDayOfWeek] = useState("");
 
   useEffect(() => {
