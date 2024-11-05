@@ -8,6 +8,7 @@ import { useRecording } from "@/hooks/useRecording";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { initializeAudioContext } from "@/services/audio";
 import { useTimer } from "@/hooks/useTimer";
+import { Snail, Languages, RotateCw } from 'lucide-react';
 
 export default function ChatBody() {
   const {
@@ -190,7 +191,7 @@ export default function ChatBody() {
                     {/* Bottom row for buttons and timestamp */}
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex gap-1">
-                        {/* <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
                           <Languages className="text-white w-4 h-4" />
                         </button>
                         <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
@@ -198,7 +199,7 @@ export default function ChatBody() {
                         </button>
                         <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
                           <Snail className="text-white w-4 h-4" />
-                        </button> */}
+                        </button>
                       </div>
                       <span className="text-xs text-gray-400">
                         {message.timestamp}
