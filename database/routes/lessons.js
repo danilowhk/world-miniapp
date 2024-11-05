@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/", createLesson);
 router.get("/", listLessons);
-router.get("/user", listLessonsByUserId);
+router.post("/user", listLessonsByUserId);
 router.get("/:id", findLessonById);
 router.post("/:id", addMessageToLesson);
 
