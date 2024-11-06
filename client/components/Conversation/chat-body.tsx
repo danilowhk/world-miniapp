@@ -74,9 +74,13 @@ export default function ChatBody() {
     handleChatFlow
   );
 
-  // Combined initialization useEffect
+  // Combined initialization and welcome message in a single useEffect
   useEffect(() => {
+    let isInitialized = false;
+
     const init = async () => {
+      if (isInitialized) return;
+      
       console.log("Initializing...");
       const audioContext = initializeAudioContext();
       if (!audioContext) {
@@ -85,29 +89,26 @@ export default function ChatBody() {
 
       await initializeAudio();
 
+      // Only add welcome message if messages array is empty
       if (messages.length === 0) {
         console.log("Adding welcome message...");
-        const welcomeMessage =
-          "Hello! I'm Emma, your AI assistant. How can I help you today?";
+        const welcomeMessage = "Hello! I'm Emma, your AI assistant. How can I help you today?";
         await addMessage(welcomeMessage, "Emma");
         await playAudio(welcomeMessage);
+        // Start timer after welcome message is added
+        startTimer();
       }
+
+      isInitialized = true;
     };
 
     init();
-  }, [initializeAudio, messages.length, addMessage, playAudio]);
 
-  // Start timer when welcome message is added
-  useEffect(() => {
-    console.log("Messages length:", messages.length);
-    console.log("Timer active:", isActive);
-    console.log("Current time:", time);
-
-    if (messages.length === 0 && !isActive) {
-      console.log("Starting timer...");
-      startTimer();
-    }
-  }, [messages.length, isActive, startTimer, time]);
+    // Cleanup function
+    return () => {
+      isInitialized = false;
+    };
+  }, []); // Empty dependency array since we want this to run only once
 
   // Auto-scroll effect
   useEffect(() => {
