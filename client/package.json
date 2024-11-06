@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "^0.0.70",
+		"@auth0/auth0-react": "^2.2.4",
 		"@types/dom-speech-recognition": "^0.0.4",
 		"@worldcoin/idkit": "^1.3.0",
 		"@worldcoin/minikit-js": "^1.0.0",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import PayTransactionPage from "@/components/SendTransaction";
 
 export default function Home() {
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white px-4 py-4">
+      <PayTransactionPage />
       {/* Header Title with Settings */}
       <div className="mb-6 flex justify-between items-start">
         <h1 className="text-4xl font-semibold leading-tight">
@@ -110,6 +112,11 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <span className="text-4xl font-bold">{coinBalance}</span>
             </div>
+            <button 
+              className="mt-4 px-6 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full font-medium text-gray-900 hover:from-yellow-500 hover:to-yellow-600 transition-colors" 
+            >
+              Claim Tokens
+            </button>
           </div>
 
           {/* Next Reward Timer */}
