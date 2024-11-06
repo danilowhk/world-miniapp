@@ -47,7 +47,7 @@ const findLessonById = async (req, res) => {
 
 const addMessageToLesson = async (req, res) => {
   const { id } = req.params;
-  const { author, type, text, timestamp } = req.body;
+  const { author, type, text, timestamp, translatedAnswer, languageTip, languageCompliment, score } = req.body;
 
   try {
     const lesson = await Lesson.findById(id);
@@ -56,7 +56,16 @@ const addMessageToLesson = async (req, res) => {
       return res.status(404).json({ message: "Lesson not found" });
     }
 
-    const newMessage = { author, type, text, timestamp: new Date(timestamp) };
+    const newMessage = {
+      author,
+      type,
+      text,
+      translatedAnswer,
+      languageTip,
+      languageCompliment,
+      score,
+      timestamp: new Date(timestamp)
+    };
 
     lesson.content.push(newMessage);
 
