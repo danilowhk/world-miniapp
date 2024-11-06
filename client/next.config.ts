@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
-  // Enable HTTPS in development
-  devServer: {
-    https: true
-  },
-  // Add required headers
+const nextConfig: NextConfig = {
+  // Remove or comment out the devServer configuration
+  // devServer: {
+  //   https: true
+  // },
   async headers() {
     return [
       {
