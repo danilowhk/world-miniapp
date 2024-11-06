@@ -8,7 +8,7 @@ import { useRecording } from "@/hooks/useRecording";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { initializeAudioContext } from "@/services/audio";
 import { useTimer } from "@/hooks/useTimer";
-import { Snail, Languages, RotateCw } from 'lucide-react';
+import { Snail, Languages, RotateCw } from "lucide-react";
 
 export default function ChatBody() {
   const {
@@ -81,7 +81,7 @@ export default function ChatBody() {
 
     const init = async () => {
       if (isInitialized) return;
-      
+
       console.log("Initializing...");
       const audioContext = initializeAudioContext();
       if (!audioContext) {
@@ -93,7 +93,8 @@ export default function ChatBody() {
       // Only add welcome message if messages array is empty
       if (messages.length === 0) {
         console.log("Adding welcome message...");
-        const welcomeMessage = "Hello! I'm Emma, your AI assistant. How can I help you today?";
+        const welcomeMessage =
+          "Hello! I'm Emma, your AI assistant. How can I help you today?";
         await addMessage(welcomeMessage, "Emma");
         await playAudio(welcomeMessage);
         // Start timer after welcome message is added
@@ -115,7 +116,12 @@ export default function ChatBody() {
   useEffect(() => {
     const element = messagesEndRef.current;
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 100);
     }
   }, [messages]);
 
@@ -171,9 +177,9 @@ export default function ChatBody() {
         {!audioState.isSpeaking && "AI Assistant"}
 
         {/* Messages Section */}
-        <div className="w-full flex-grow overflow-y-auto px-4 pb-4">
-          <div className="bg-gray-800 rounded-lg p-4 h-full overflow-y-auto">
-            <div className="space-y-4">
+        <div className="w-full flex-grow overflow-y-auto px-4 pb-4 max-h-[calc(100vh-200px)]">
+          <div className="flex flex-col min-h-full">
+            <div className="space-y-4 flex-grow">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -188,7 +194,7 @@ export default function ChatBody() {
                         : "bg-gray-200 text-gray-900 rounded-tl-none"
                     }`}
                   >
-                    <div className="text-xl">{message.text}</div>
+                    <div className="text-xl break-words">{message.text}</div>
                     {/* Bottom row for buttons and timestamp */}
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex gap-1">
