@@ -63,7 +63,7 @@ export default function Home() {
     "Persistence in doing something despite difficulty or delay in achieving success.";
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-800 p-6 space-y-8">
+    <main className="h-screen bg-gray-50 text-gray-800 pt-6 px-6 pb-36 space-y-8 overflow-y-auto">
       <PayTransactionPage />
 
       {/* Header */}

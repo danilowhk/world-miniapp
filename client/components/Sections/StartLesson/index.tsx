@@ -29,7 +29,7 @@ export default function LessonsSection({ lessons }: { lessons: any }) {
           </p>
           <a
             href="/chat/roleplays"
-            className="rounded-full bg-gradient-to-br from-blue-400 to-blue-700 px-8 py-3 text-lg font-semibold text-white shadow-lg hover:from-blue-600 hover:to-purple-600 transition-all animate-pulse-custom"
+            className="rounded-full bg-gradient-to-br from-blue-400 to-blue-700 px-8 py-3 text-lg font-semibold text-white shadow-lg hover:from-blue-600 hover:to-purple-600 transition-all "
           >
             Get started
           </a>
