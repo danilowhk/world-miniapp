@@ -128,9 +128,11 @@ export default function LanguageSelection() {
   const router = useRouter();
   const [nativeLanguage, setNativeLanguage] = useState("");
   const [targetLanguage, setTargetLanguage] = useState("");
+  const [name, setName] = useState("");
 
   const handleNext = () => {
-    if (nativeLanguage && targetLanguage) {
+    if (name && nativeLanguage && targetLanguage) {
+      localStorage.setItem("userName", name);
       localStorage.setItem("nativeLanguage", nativeLanguage);
       localStorage.setItem("targetLanguage", targetLanguage);
       router.push("/onboarding/interests");
@@ -152,9 +154,9 @@ export default function LanguageSelection() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-semibold leading-tight">
-          Choose your
+          Welcome!
           <br />
-          <span className="font-bold">languages</span>
+          <span className="font-bold">Let's get started</span>
         </h1>
       </div>
 
@@ -176,16 +178,28 @@ export default function LanguageSelection() {
         />
       </div>
 
+      {/* Name Input */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-2 text-gray-800">My name is</h2>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your name"
+          className="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200"
+        />
+      </div>
+
       {/* Next Button */}
       <div className="fixed bottom-6 left-0 right-0 px-4">
         <button
           onClick={handleNext}
-          disabled={!nativeLanguage || !targetLanguage}
+          disabled={!name || !nativeLanguage || !targetLanguage}
           className={`
             w-full py-3 px-6 rounded-full text-white font-medium
             transition-all duration-200
             ${
-              nativeLanguage && targetLanguage
+              name && nativeLanguage && targetLanguage
                 ? "bg-black hover:bg-gray-800"
                 : "bg-gray-300 cursor-not-allowed"
             }
