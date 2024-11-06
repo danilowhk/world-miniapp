@@ -1,6 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import {
+  User,
+  Bell,
+  Lock,
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 export default function Settings() {
   const router = useRouter();
@@ -8,25 +16,25 @@ export default function Settings() {
   const settingsOptions = [
     {
       title: "Edit Profile",
-      icon: "👤",
+      icon: <User className="w-6 h-6 text-blue-500" />,
       description: "Change your personal information",
       action: () => console.log("Edit Profile clicked"),
     },
     {
       title: "Notifications",
-      icon: "🔔",
+      icon: <Bell className="w-6 h-6 text-blue-500" />,
       description: "Manage your notification preferences",
       action: () => console.log("Notifications clicked"),
     },
     {
       title: "Recovery Method",
-      icon: "🔒",
+      icon: <Lock className="w-6 h-6 text-blue-500" />,
       description: "Set up account recovery options",
       action: () => console.log("Recovery clicked"),
     },
     {
       title: "Support",
-      icon: "💬",
+      icon: <MessageSquare className="w-6 h-6 text-blue-500" />,
       description: "Get help and contact support",
       action: () => console.log("Support clicked"),
     },
@@ -40,20 +48,7 @@ export default function Settings() {
           onClick={() => router.back()}
           className="p-2 rounded-full hover:bg-gray-100 transition-colors mr-2"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-6 h-6 text-gray-600"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 19.5L8.25 12l7.5-7.5"
-            />
-          </svg>
+          <ChevronLeft className="w-6 h-6 text-gray-600" />
         </button>
         <h1 className="text-3xl font-semibold text-gray-800">Settings</h1>
       </div>
@@ -69,26 +64,13 @@ export default function Settings() {
           >
             <div className="flex items-center">
               <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mr-4">
-                <span className="text-2xl">{option.icon}</span>
+                {option.icon}
               </div>
               <div className="flex-1 text-left">
                 <h3 className="font-semibold text-gray-800">{option.title}</h3>
                 <p className="text-sm text-gray-600">{option.description}</p>
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5 text-gray-400"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                />
-              </svg>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
             </div>
           </button>
         ))}

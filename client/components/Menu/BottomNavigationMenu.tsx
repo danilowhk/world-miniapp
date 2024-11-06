@@ -1,46 +1,11 @@
+"use client";
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Home, MessageCircle, Trophy } from "lucide-react";
+import MenuButton from "./MenuButton"; // Adjust the import path if necessary
 
-interface MenuButtonProps {
-  icon: string;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-function MenuButton({ icon, label, isActive, onClick }: MenuButtonProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        flex flex-col items-center gap-1 py-1 px-3 rounded-xl
-        transition-all duration-200
-        ${
-          isActive
-            ? "text-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50"
-            : "text-gray-400 hover:text-gray-600"
-        }
-      `}
-    >
-      <div
-        className={`
-        w-10 h-10 flex items-center justify-center rounded-full
-        transition-all duration-200
-        ${
-          isActive
-            ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm"
-            : "bg-gray-50"
-        }
-      `}
-      >
-        <span className="text-xl">{icon}</span>
-      </div>
-      <span className="text-xs font-medium">{label}</span>
-    </button>
-  );
-}
-
-export default function BottomNavigationMenu() {
+const BottomNavigationMenu: React.FC = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("home");
 
@@ -48,40 +13,34 @@ export default function BottomNavigationMenu() {
     setActiveTab(tab);
 
     // Define route paths for each tab
-    let path = "/";
-    switch (tab) {
-      case "home":
-        path = "/";
-        break;
-      case "chat":
-        path = "/chat";
-        break;
-      case "ranking":
-        path = "/ranking";
-        break;
-      default:
-        break;
-    }
+    const paths: { [key: string]: string } = {
+      home: "/",
+      chat: "/chat",
+      ranking: "/ranking",
+    };
 
     // Navigate to the selected path
-    router.push(path);
+    router.push(paths[tab]);
   };
 
   const menuItems = [
-    { id: "home", icon: "🏠", label: "Home" },
-    { id: "chat", icon: "💭", label: "Chat" },
-    { id: "ranking", icon: "🏆", label: "Ranking" },
+    { id: "home", icon: Home, label: "Home" },
+    { id: "chat", icon: MessageCircle, label: "Chat" },
+    { id: "ranking", icon: Trophy, label: "Ranking" },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 px-2 pb-2">
+    <div className="w-full fixed bottom-4 left-1/2 transform -translate-x-1/2">
       <nav
         className="
-        bg-white border border-gray-100 
-        rounded-2xl shadow-lg shadow-gray-200/50
-        flex justify-around items-center py-2 px-1
-        backdrop-blur-lg bg-white/95
-      "
+          bg-white bg-opacity-80 backdrop-blur-lg 
+          border border-gray-200 
+          rounded-full 
+          flex justify-around items-center 
+          px-4 py-2
+          shadow-md shadow-gray-300
+          w-11/12 mx-auto
+        "
       >
         {menuItems.map((item) => (
           <MenuButton
@@ -95,4 +54,6 @@ export default function BottomNavigationMenu() {
       </nav>
     </div>
   );
-}
+};
+
+export default BottomNavigationMenu;
