@@ -1,12 +1,12 @@
 // app/api/users/route.ts
+import { User } from "@/types/user";
 import { NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL;
 
 // Create User
-export async function createUser(request: Request) {
+export async function createUser(userData: User) {
   try {
-    const userData = await request.json();
     const response = await fetch(`${BACKEND_URL}/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
