@@ -58,6 +58,12 @@ const roleplays = [
   },
 ];
 
+// Define color mapping for levels
+const levelColors = {
+  Basics: "bg-blue-500",
+  Advanced: "bg-purple-500",
+};
+
 export default function RolesSection() {
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -79,7 +85,7 @@ export default function RolesSection() {
             <a
               key={roleplay.id}
               href={roleplay.href}
-              className="relative aspect-[3/4] rounded-3xl overflow-hidden"
+              className="relative aspect-[3/4] rounded-xl overflow-hidden"
             >
               {/* Background image */}
               <img
@@ -89,18 +95,22 @@ export default function RolesSection() {
               />
 
               {/* Gradient overlay for better text readability */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/80" />
 
               {/* Content */}
-              <div className="absolute inset-0 p-6 flex flex-col justify-between">
+              <div className="absolute inset-0 p-4 flex flex-col justify-between">
                 {/* Title */}
-                <h2 className="text-white text-3xl font-semibold leading-tight">
+                <h2 className="text-white text-xl font-semibold leading-tight">
                   {roleplay.name}
                 </h2>
 
                 {/* Level badge */}
                 <div className="self-start">
-                  <span className="inline-block bg-white/90 text-black px-4 py-2 rounded-full text-sm">
+                  <span
+                    className={`inline-block ${
+                      levelColors[roleplay.level]
+                    } text-white px-4 py-2 rounded-md text-sm`}
+                  >
                     {roleplay.level}
                   </span>
                 </div>
