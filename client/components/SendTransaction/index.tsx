@@ -1,37 +1,54 @@
-import { useState, useEffect } from 'react';
-import { MiniKit, ResponseEvent, MiniAppSendTransactionPayload } from '@worldcoin/minikit-js';
-import { useWaitForTransactionReceipt } from '@worldcoin/minikit-react';
-import { createPublicClient, http, PublicClient } from 'viem';
-import { worldchain } from 'viem/chains';
-import TestABI from '../../abi/Test.json';
+import { useState, useEffect } from "react";
+import {
+  MiniKit,
+  ResponseEvent,
+  MiniAppSendTransactionPayload,
+} from "@worldcoin/minikit-js";
+import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
+import { createPublicClient, http, PublicClient } from "viem";
+import { worldchain } from "viem/chains";
+import TestABI from "../../abi/Test.json";
+import { Gift, CheckCircle, Loader2 } from "lucide-react";
 
 export default function PayTransactionPage() {
-  const [transactionId, setTransactionId] = useState<string>('');
+  const [transactionId, setTransactionId] = useState<string>("");
 
   const client = createPublicClient({
     chain: worldchain,
-    transport: http('https://worldchain-mainnet.g.alchemy.com/public'),
+    transport: http("https://worldchain-mainnet.g.alchemy.com/public"),
   });
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    client: client as PublicClient,
-    appConfig: {
-      app_id: 'app_5163d7ca23d0d3931c0d5930134a9a4d',
-    },
-    transactionId: transactionId,
-  });
-
-  const sendTransactionCommand = async() => {
-    const {commandPayload, finalPayload} = await MiniKit.commandsAsync.sendTransaction({
-      transaction: [
-        {
-          address: '0xA0C794A7896285c893385B18E8BaF4F0eB87C836', // Replace with actual contract address
-          abi: [{ type: "function", name: "mint", inputs: [{ name: "amount", type: "uint256", internalType: "uint256" }], outputs: [], stateMutability: "nonpayable" }],
-          functionName: 'mint',
-          args: ['5000000000000000000'], // 1 ether = 10^18 wei
-        },
-      ],
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      client: client as PublicClient,
+      appConfig: {
+        app_id: "app_5163d7ca23d0d3931c0d5930134a9a4d",
+      },
+      transactionId: transactionId,
     });
+
+  const sendTransactionCommand = async () => {
+    const { commandPayload, finalPayload } =
+      await MiniKit.commandsAsync.sendTransaction({
+        transaction: [
+          {
+            address: "0xA0C794A7896285c893385B18E8BaF4F0eB87C836", // Replace with actual contract address
+            abi: [
+              {
+                type: "function",
+                name: "mint",
+                inputs: [
+                  { name: "amount", type: "uint256", internalType: "uint256" },
+                ],
+                outputs: [],
+                stateMutability: "nonpayable",
+              },
+            ],
+            functionName: "mint",
+            args: ["5000000000000000000"], // 1 ether = 10^18 wei
+          },
+        ],
+      });
 
     console.log(commandPayload, finalPayload);
   };
@@ -44,8 +61,8 @@ export default function PayTransactionPage() {
     MiniKit.subscribe(
       ResponseEvent.MiniAppSendTransaction,
       async (payload: MiniAppSendTransactionPayload) => {
-        if (payload.status === 'error') {
-          console.error('Error sending transaction', payload);
+        if (payload.status === "error") {
+          console.error("Error sending transaction", payload);
         } else {
           setTransactionId(payload.transaction_id);
         }
@@ -58,33 +75,39 @@ export default function PayTransactionPage() {
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-6 border border-blue-100 shadow-sm">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 shadow-md">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-sm">
-          <span className="text-xl">🎁</span>
+        <div className="w-10 h-10 flex items-center justify-center bg-indigo-100 rounded-full">
+          <Gift className="w-5 h-5 text-indigo-600" />
         </div>
-        <h1 className="text-xl font-semibold text-gray-800">Claim Rewards</h1>
+        <h2 className="text font-semibold text-indigo-900">Claim Rewards</h2>
       </div>
-      
-      <button 
-        onClick={sendTransactionCommand} 
+
+      <button
+        onClick={sendTransactionCommand}
         disabled={isConfirming}
-        className={`w-full py-3 px-6 rounded-xl font-medium text-white transition-all
-          ${isConfirming 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900'
+        className={`w-full py-3 px-6 rounded-lg font-medium text-white transition-all flex items-center justify-center
+          ${
+            isConfirming
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
           }`}
       >
-        {isConfirming ? 'Confirming...' : 'Send Transaction'}
+        {isConfirming ? (
+          <>
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            Confirming...
+          </>
+        ) : (
+          "Send Transaction"
+        )}
       </button>
-      
+
       {isConfirmed && (
-        <div className="mt-4 p-4 bg-green-50 border border-green-100 rounded-xl">
-          <div className="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <p className="text-green-700 font-medium">Transaction Confirmed!</p>
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center gap-2 text-green-700">
+            <CheckCircle className="w-5 h-5" />
+            <p className="font-medium">Transaction Confirmed!</p>
           </div>
         </div>
       )}

@@ -1,16 +1,16 @@
 "use client";
 
-import { ReactNode } from "react";
+import { LucideIcon } from "lucide-react";
 
 interface MenuButtonProps {
-  icon: ReactNode;
+  icon: LucideIcon;
   label: string;
   isActive: boolean;
   onClick: () => void;
 }
 
 export default function MenuButton({
-  icon,
+  icon: Icon,
   label,
   isActive,
   onClick,
@@ -18,14 +18,23 @@ export default function MenuButton({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center transform active:scale-95 transition-transform duration-100 ${
-        isActive ? "text-blue-500" : "text-gray-500"
-      }`}
+      aria-label={label}
+      className={`
+        flex flex-col items-center gap-0.5 py-1 px-2 rounded-full
+        transition-colors duration-200
+        ${isActive ? "text-blue-600" : "text-gray-400 hover:text-gray-600"}
+      `}
     >
-      <div className="transform hover:scale-110 transition-transform duration-200">
-        {icon}
+      <div
+        className={`
+          w-12 h-12 flex items-center justify-center rounded-full
+          transition-all duration-200
+          ${isActive ? "bg-blue-100 backdrop-blur-lg" : "bg-transparent"}
+        `}
+      >
+        <Icon className="w-6 h-6" />
       </div>
-      <span className="text-xs">{label}</span>
+      <span className="text-xs font-medium hidden sm:inline">{label}</span>
     </button>
   );
 }
