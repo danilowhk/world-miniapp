@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useEffect, useCallback } from "react";
-import { User, Mic, Volume2, VolumeX } from "lucide-react";
+import { Mic, Volume2, VolumeX, ArrowLeft, MoreVertical, Snail, Languages, RotateCw, } from "lucide-react";
 import { useAudio } from "@/hooks/useAudio";
 import { useChat } from "@/hooks/useChat";
 import { useRecording } from "@/hooks/useRecording";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { initializeAudioContext } from "@/services/audio";
 import { useTimer } from "@/hooks/useTimer";
-import { Snail, Languages, RotateCw } from "lucide-react";
 
 export default function ChatBody() {
   const {
@@ -21,7 +20,7 @@ export default function ChatBody() {
     initializeAudio,
   } = useAudio();
 
-  const { messages, messagesEndRef, addMessage, getCurrentTime } = useChat();
+  const { messages, messagesEndRef, addMessage } = useChat();
 
   const handleTimeLimit = useCallback(() => {
     console.log("Time limit reached!");
@@ -31,7 +30,7 @@ export default function ChatBody() {
       messages,
       startTime: messages[0]?.timestamp || new Date().toISOString(),
       endTime: new Date().toISOString(),
-      duration: 180,
+      duration: 600,
       totalMessages: messages.length,
       userMessages: messages.filter((m) => m.speaker === "You").length,
       assistantMessages: messages.filter((m) => m.speaker === "Emma").length,
@@ -54,8 +53,7 @@ export default function ChatBody() {
     alert("Time limit reached! Check console for conversation data.");
   }, [messages]);
 
-  const { formatTime, startTimer, stopTimer, resetTimer, isActive, time } =
-    useTimer(10, handleTimeLimit); // Changed to 10 seconds for testing
+  const { formatTime, startTimer, stopTimer, resetTimer, isActive, time, } = useTimer(600, handleTimeLimit);
 
   const { handleChatFlow } = useChatFlow(
     async (text: string, speaker: "You" | "Emma") => {
@@ -75,7 +73,6 @@ export default function ChatBody() {
     handleChatFlow
   );
 
-  // Combined initialization and welcome message in a single useEffect
   useEffect(() => {
     let isInitialized = false;
 
@@ -90,14 +87,12 @@ export default function ChatBody() {
 
       await initializeAudio();
 
-      // Only add welcome message if messages array is empty
       if (messages.length === 0) {
         console.log("Adding welcome message...");
         const welcomeMessage =
           "Hello! I'm Emma, your AI assistant. How can I help you today?";
         await addMessage(welcomeMessage, "Emma");
         await playAudio(welcomeMessage);
-        // Start timer after welcome message is added
         startTimer();
       }
 
@@ -106,22 +101,15 @@ export default function ChatBody() {
 
     init();
 
-    // Cleanup function
     return () => {
       isInitialized = false;
     };
   }, []); // Empty dependency array since we want this to run only once
 
-  // Auto-scroll effect
   useEffect(() => {
     const element = messagesEndRef.current;
     if (element) {
-      setTimeout(() => {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
-      }, 100);
+      element.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
@@ -143,115 +131,111 @@ export default function ChatBody() {
   });
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-gray-700 to-gray-900">
-      {/* Header with Timer */}
-      <div className="flex items-center p-4 text-white">
-        <div className="text-sm">{getCurrentTime()}</div>
-        <div className="flex-grow"></div>
-        <div className="text-sm font-mono bg-gray-800 px-3 py-1 rounded-full">
-          {formatTime()} {isActive ? "●" : "○"}
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex items-center px-4 text-white">
-        <button className="p-2">←</button>
-        <div className="text-xl ml-2">Call Mode</div>
-        <div className="flex-grow"></div>
-        <button
-          onClick={toggleMute}
-          className="p-2 hover:bg-gray-600 rounded-full transition-colors"
-          title={audioState.isMuted ? "Unmute" : "Mute"}
-        >
-          {audioState.isMuted ? (
-            <VolumeX className="w-6 h-6" />
-          ) : (
-            <Volume2 className="w-6 h-6" />
-          )}
-        </button>
-        <button className="p-2">⋮</button>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-col items-center pt-6 text-white">
-        {!audioState.isSpeaking && "AI Assistant"}
-
-        {/* Messages Section */}
-        <div className="w-full flex-grow overflow-y-auto px-4 pb-4 max-h-[calc(100vh-200px)]">
-          <div className="flex flex-col min-h-full">
-            <div className="space-y-4 flex-grow">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex flex-col ${
-                    message.speaker === "You" ? "items-end" : "items-start"
-                  }`}
-                >
-                  <div
-                    className={`mt-1 px-4 py-2 rounded-lg max-w-[80%] ${
-                      message.speaker === "You"
-                        ? "bg-green-500 text-white rounded-br-none"
-                        : "bg-gray-200 text-gray-900 rounded-tl-none"
-                    }`}
-                  >
-                    <div className="text-xl break-words">{message.text}</div>
-                    {/* Bottom row for buttons and timestamp */}
-                    <div className="flex justify-between items-center mt-2">
-                      <div className="flex gap-1">
-                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                          <Languages className="text-white w-4 h-4" />
-                        </button>
-                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                          <RotateCw className="text-white w-4 h-4" />
-                        </button>
-                        <button className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                          <Snail className="text-white w-4 h-4" />
-                        </button>
-                      </div>
-                      <span className="text-xs text-gray-400">
-                        {message.timestamp}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Status Indicators */}
-            {audioState.isRecording && (
-              <div className="flex items-center justify-center mt-4 text-gray-400">
-                <div className="animate-pulse flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-sm">Recording...</span>
-                </div>
-              </div>
-            )}
-
-            {audioState.isProcessing && (
-              <div className="flex items-center justify-center mt-4 text-gray-400">
-                <div className="animate-pulse flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm">Processing...</span>
-                </div>
-              </div>
-            )}
+    <div className="flex flex-col h-screen bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center">
+          <button className="p-2">
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <div className="ml-2 text-xl font-semibold text-gray-700">Emma</div>
+          {/* Timer */}
+          <div className="ml-4 text-sm font-mono bg-gray-100 px-3 py-1 rounded-full text-gray-700">
+            {formatTime()} {isActive ? "●" : "○"}
           </div>
         </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={toggleMute}
+            className="p-2 rounded-full hover:bg-gray-100"
+            title={audioState.isMuted ? "Unmute" : "Mute"}
+          >
+            {audioState.isMuted ? (
+              <VolumeX className="w-6 h-6 text-gray-600" />
+            ) : (
+              <Volume2 className="w-6 h-6 text-gray-600" />
+            )}
+          </button>
+          <button className="p-2 rounded-full hover:bg-gray-100">
+            <MoreVertical className="w-6 h-6 text-gray-600" />
+          </button>
+        </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="flex justify-around items-center p-6">
-        <button
-          onClick={handleToggleRecording}
-          className={`w-12 h-12 rounded-full flex items-center justify-center ${
-            audioState.isRecording ? "bg-red-600" : "bg-blue-600"
-          } ${audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""}`}
-          disabled={audioState.isSpeaking}
-        >
-          <Mic className="text-white w-6 h-6" />
-        </button>
+      {/* Messages */}
+      <div className="flex flex-col flex-grow overflow-y-auto p-4">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.speaker === "You" ? "justify-end" : "justify-start"
+                }`}
+            >
+              <div
+                className={`max-w-xs rounded-lg px-4 py-2 ${message.speaker === "You"
+                  ? "bg-blue-500 text-white rounded-tr-none"
+                  : "bg-gray-100 text-gray-800 rounded-tl-none"
+                  }`}
+              >
+                <div className="text-base">{message.text}</div>
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex space-x-2">
+                    <button className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center">
+                      <Languages className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center">
+                      <RotateCw className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center">
+                      <Snail className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
+                  <span className="text-xs text-gray-700">
+                    {new Date(message.timestamp).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Status Indicators */}
+        {audioState.isRecording && (
+          <div className="flex items-center justify-center mt-4 text-gray-700">
+            <div className="animate-pulse flex items-center gap-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <span className="text-sm">Recording...</span>
+            </div>
+          </div>
+        )}
+
+        {audioState.isProcessing && (
+          <div className="flex items-center justify-center mt-4 text-gray-700">
+            <div className="animate-pulse flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-sm">Processing...</span>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Mic Button */}
+      <button
+        onClick={handleToggleRecording}
+        className={`w-14 h-14 rounded-full flex items-center justify-center ${audioState.isRecording ? "bg-red-500" : "bg-blue-500"
+          } ${audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""
+          } fixed right-8 bottom-28`}
+        disabled={audioState.isSpeaking}
+      >
+        <Mic className="w-6 h-6 text-white" />
+      </button>
+      {/* Padding at the bottom */}
+      <div className="pb-20"></div>
     </div>
   );
 }
