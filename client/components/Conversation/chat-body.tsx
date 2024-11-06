@@ -224,17 +224,16 @@ export default function ChatBody() {
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="flex items-center justify-center p-4 border-t border-gray-200">
-        <button
-          onClick={handleToggleRecording}
-          className={`w-12 h-12 rounded-full flex items-center justify-center ${audioState.isRecording ? "bg-red-500" : "bg-blue-500"
-            } ${audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""}`}
-          disabled={audioState.isSpeaking}
-        >
-          <Mic className="w-6 h-6 text-white" />
-        </button>
-      </div>
+      {/* Mic Button */}
+      <button
+        onClick={handleToggleRecording}
+        className={`w-14 h-14 rounded-full flex items-center justify-center ${audioState.isRecording ? "bg-red-500" : "bg-blue-500"
+          } ${audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""
+          } fixed right-8 bottom-28`}
+        disabled={audioState.isSpeaking}
+      >
+        <Mic className="w-6 h-6 text-white" />
+      </button>
       {/* Padding at the bottom */}
       <div className="pb-20"></div>
     </div>
