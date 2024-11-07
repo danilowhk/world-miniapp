@@ -223,7 +223,7 @@ export default function ChatBody() {
                     )}
                     {message.score !== undefined && (
                       <div className="text-sm text-gray-500 mt-2">
-                        Score: {message.score}%
+                        Score: {message.score}/100
                       </div>
                     )}
                   </>
