@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 const lessonSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
+    userAuthSub: {
+      type: String,
       ref: "User",
       required: true,
     },

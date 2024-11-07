@@ -20,10 +20,10 @@ const listUsers = async (_, res) => {
   }
 };
 
-const findUserById = async (req, res) => {
-  const { id } = req.params;
+const findUserBySub = async (req, res) => {
+  const { sub } = req.params;
   try {
-    const user = await User.findById(id);
+    const user = await User.find({ authSub: sub });
     if (user) {
       res.status(200).json(user);
     } else {
@@ -35,14 +35,18 @@ const findUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { id } = req.params;
+  const { sub } = req.params;
   const updateData = req.body;
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedUser = await User.findOneAndUpdate(
+      { authSub: sub },
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -54,4 +58,4 @@ const updateUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser, listUsers, findUserById, updateUser };
+module.exports = { createUser, listUsers, findUserBySub, updateUser };
