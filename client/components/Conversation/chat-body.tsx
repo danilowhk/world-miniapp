@@ -17,6 +17,8 @@ import { useRecording } from "@/hooks/useRecording";
 import { useChatFlow } from "@/hooks/useChatFlow";
 import { initializeAudioContext } from "@/services/audio";
 import { useTimer } from "@/hooks/useTimer";
+import { useSearchParams } from "next/navigation";
+import { generateWelcomeMessage } from "@/utils/welcomeMessages";
 
 export default function ChatBody() {
   const {
@@ -97,6 +99,8 @@ export default function ChatBody() {
     handleChatFlow
   );
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     let isInitialized = false;
 
@@ -113,8 +117,19 @@ export default function ChatBody() {
 
       if (messages.length === 0) {
         console.log("Adding welcome message...");
-        const welcomeMessage =
+        let welcomeMessage =
           "Hello! I'm Emma, your AI assistant. How can I help you today?";
+
+        const roleplayParam = searchParams.get("roleplay");
+        if (roleplayParam) {
+          try {
+            const roleplay = JSON.parse(decodeURIComponent(roleplayParam));
+            welcomeMessage = generateWelcomeMessage(roleplay);
+          } catch (error) {
+            console.error("Error parsing roleplay data:", error);
+          }
+        }
+
         await addMessage(welcomeMessage, "Emma");
         await playAudio(welcomeMessage);
         startTimer();

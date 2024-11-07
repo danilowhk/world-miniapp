@@ -84,7 +84,9 @@ export default function RolesSection() {
           {roleplays.map((roleplay) => (
             <a
               key={roleplay.id}
-              href={roleplay.href}
+              href={`/chat/conversation?roleplay=${encodeURIComponent(
+                JSON.stringify(roleplay)
+              )}`}
               className="relative aspect-[3/4] rounded-xl overflow-hidden"
             >
               {/* Background image */}

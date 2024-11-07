@@ -5,6 +5,7 @@ import {
   DEFAULT_PREFERENCES,
   LanguagePreferences,
 } from "@/types/userPreferences";
+import { generateRoleplayPrompt } from "@/utils/roleplayPrompts";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -72,7 +73,11 @@ Remember to:
 
 export async function POST(request: Request) {
   try {
-    const { message, preferences = DEFAULT_PREFERENCES } = await request.json();
+    const {
+      message,
+      roleplay,
+      preferences = DEFAULT_PREFERENCES,
+    } = await request.json();
 
     if (!message) {
       return NextResponse.json(
@@ -86,7 +91,9 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: generateSystemPrompt(preferences),
+          content: roleplay
+            ? generateRoleplayPrompt(roleplay, preferences)
+            : generateSystemPrompt(preferences),
         },
         {
           role: "user",
