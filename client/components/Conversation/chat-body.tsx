@@ -142,14 +142,14 @@ export default function ChatBody() {
 
       if (messages.length === 0) {
         console.log("Adding welcome message...");
-        let welcomeMessage =
-          "Hello! I'm Emma, your AI assistant. How can I help you today?";
+        const userName = localStorage.getItem("userName") || "there";
+        let welcomeMessage = `Hello, ${userName}! I'm Emma, your AI assistant. How can I help you today?`;
 
         const roleplayParam = searchParams.get("roleplay");
         if (roleplayParam) {
           try {
             const roleplay = JSON.parse(decodeURIComponent(roleplayParam));
-            welcomeMessage = generateWelcomeMessage(roleplay);
+            welcomeMessage = generateWelcomeMessage(roleplay, userName);
           } catch (error) {
             console.error("Error parsing roleplay data:", error);
           }
