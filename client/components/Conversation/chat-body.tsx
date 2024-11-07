@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useCallback } from "react";
-import { Mic, Volume2, VolumeX, ArrowLeft, MoreVertical, Snail, Languages, RotateCw, } from "lucide-react";
+import {
+  Mic,
+  Volume2,
+  VolumeX,
+  ArrowLeft,
+  MoreVertical,
+  Snail,
+  Languages,
+  RotateCw,
+} from "lucide-react";
 import { useAudio } from "@/hooks/useAudio";
 import { useChat } from "@/hooks/useChat";
 import { useRecording } from "@/hooks/useRecording";
@@ -53,11 +62,26 @@ export default function ChatBody() {
     alert("Time limit reached! Check console for conversation data.");
   }, [messages]);
 
-  const { formatTime, startTimer, stopTimer, resetTimer, isActive, time, } = useTimer(600, handleTimeLimit);
+  const { formatTime, startTimer, stopTimer, resetTimer, isActive, time } =
+    useTimer(600, handleTimeLimit);
 
   const { handleChatFlow } = useChatFlow(
-    async (text: string, speaker: "You" | "Emma") => {
-      const message = await addMessage(text, speaker);
+    async (
+      text: string,
+      speaker: "You" | "Emma",
+      score?: number,
+      translation?: string,
+      language_tip?: string,
+      language_compliment?: string
+    ) => {
+      const message = await addMessage(
+        text,
+        speaker,
+        score,
+        translation,
+        language_tip,
+        language_compliment
+      );
       if (speaker === "Emma") {
         await playAudio(text);
       }
@@ -168,16 +192,42 @@ export default function ChatBody() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.speaker === "You" ? "justify-end" : "justify-start"
-                }`}
+              className={`flex ${
+                message.speaker === "You" ? "justify-end" : "justify-start"
+              }`}
             >
               <div
-                className={`max-w-xs rounded-lg px-4 py-2 ${message.speaker === "You"
-                  ? "bg-blue-500 text-white rounded-tr-none"
-                  : "bg-gray-100 text-gray-800 rounded-tl-none"
-                  }`}
+                className={`max-w-xs rounded-lg px-4 py-2 ${
+                  message.speaker === "You"
+                    ? "bg-blue-500 text-white rounded-tr-none"
+                    : "bg-gray-100 text-gray-800 rounded-tl-none"
+                }`}
               >
                 <div className="text-base">{message.text}</div>
+                {message.speaker === "Emma" && (
+                  <>
+                    {message.translation && (
+                      <div className="text-sm text-gray-500 mt-2 italic">
+                        {message.translation}
+                      </div>
+                    )}
+                    {message.language_tip && (
+                      <div className="text-sm text-blue-600 mt-2">
+                        💡 {message.language_tip}
+                      </div>
+                    )}
+                    {message.language_compliment && (
+                      <div className="text-sm text-green-600 mt-2">
+                        ⭐ {message.language_compliment}
+                      </div>
+                    )}
+                    {message.score !== undefined && (
+                      <div className="text-sm text-gray-500 mt-2">
+                        Score: {message.score}%
+                      </div>
+                    )}
+                  </>
+                )}
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex space-x-2">
@@ -227,9 +277,11 @@ export default function ChatBody() {
       {/* Mic Button */}
       <button
         onClick={handleToggleRecording}
-        className={`w-14 h-14 rounded-full flex items-center justify-center ${audioState.isRecording ? "bg-red-500" : "bg-blue-500"
-          } ${audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""
-          } fixed right-8 bottom-28`}
+        className={`w-14 h-14 rounded-full flex items-center justify-center ${
+          audioState.isRecording ? "bg-red-500" : "bg-blue-500"
+        } ${
+          audioState.isSpeaking ? "opacity-50 cursor-not-allowed" : ""
+        } fixed right-8 bottom-28`}
         disabled={audioState.isSpeaking}
       >
         <Mic className="w-6 h-6 text-white" />

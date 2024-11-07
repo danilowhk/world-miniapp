@@ -1,6 +1,6 @@
 // src/hooks/useChat.ts
-import { useState, useRef } from 'react';
-import { Message } from '../types/chat';
+import { useState, useRef } from "react";
+import { Message } from "../types/chat";
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -14,15 +14,26 @@ export const useChat = () => {
     });
   };
 
-  const addMessage = async (text: string, speaker: "You" | "Emma") => {
+  const addMessage = async (
+    text: string,
+    speaker: "You" | "Emma",
+    score?: number,
+    translation?: string,
+    language_tip?: string,
+    language_compliment?: string
+  ) => {
     const newMessage: Message = {
       id: `${speaker}-${messageIdCounter.current++}-${Date.now()}`,
       text,
+      translation,
       speaker,
       timestamp: getCurrentTime(),
+      score,
+      language_tip,
+      language_compliment,
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     return newMessage;
   };
 
@@ -30,6 +41,6 @@ export const useChat = () => {
     messages,
     messagesEndRef,
     addMessage,
-    getCurrentTime
+    getCurrentTime,
   };
 };

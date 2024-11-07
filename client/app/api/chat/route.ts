@@ -6,6 +6,44 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Define the response structure
+const responseStructure = {
+  type: "object",
+  properties: {
+    message: {
+      type: "string",
+      description: "The AI assistant's response message",
+    },
+    translation: {
+      type: "string",
+      description:
+        "The translation of the message in the user's native language (Portuguese)",
+    },
+    score: {
+      type: "number",
+      description: "Confidence score from 0 to 100",
+      minimum: 0,
+      maximum: 100,
+    },
+    language_tip: {
+      type: "string",
+      description: "A helpful language tip related to the response",
+    },
+    language_compliment: {
+      type: "string",
+      description:
+        "An encouraging compliment about the user's learning journey",
+    },
+  },
+  required: [
+    "message",
+    "translation",
+    "score",
+    "language_tip",
+    "language_compliment",
+  ],
+};
+
 export async function POST(request: Request) {
   try {
     const { message } = await request.json();
@@ -17,7 +55,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
@@ -30,15 +68,34 @@ export async function POST(request: Request) {
           content: message,
         },
       ],
-      max_tokens: 150,
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "process_response",
+            description: "Process the AI response with confidence score",
+            parameters: responseStructure,
+          },
+        },
+      ],
+      tool_choice: {
+        type: "function",
+        function: { name: "process_response" },
+      },
     });
 
-    const aiResponse =
-      response.choices[0]?.message?.content ||
-      "I'm sorry, I couldn't process that.";
+    const responseContent = JSON.parse(
+      completion.choices[0].message.tool_calls?.[0].function.arguments || "{}"
+    );
+
+    console.log("responseContent", responseContent);
 
     return NextResponse.json({
-      text: aiResponse,
+      text: responseContent.message,
+      translation: responseContent.translation,
+      score: responseContent.score,
+      language_tip: responseContent.language_tip,
+      language_compliment: responseContent.language_compliment,
     });
   } catch (error) {
     console.error("Chat API error:", error);
