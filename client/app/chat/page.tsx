@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import LessonsSection from "@/components/Sections/StartLesson";
 import { useSession } from "next-auth/react";
 
-const database_url = process.env.DATABASE_URL;
+
 
 export default function ChatPage() {
+  const database_url = process.env.NEXT_PUBLIC_DATABASE_URL;
+
   const { data } = useSession();
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     const fetchLessons = async () => {
-      if (!data) return;
+      // if (!data) return;
 
       try {
         const response = await fetch(`${database_url}/lessons/user`, {
@@ -57,7 +59,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 pb-12">
-      <LessonsSection lessons={lessons} />
+      <LessonsSection lessons={lessons} loading={loading}/>
     </div>
   );
 }

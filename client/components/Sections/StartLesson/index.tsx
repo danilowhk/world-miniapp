@@ -5,7 +5,7 @@ import { BadgePlus, TimerReset } from "lucide-react";
 import { LessonsHeader } from "./lessons-header";
 import LessonsTable from "./lessons-table";
 
-export default function LessonsSection({ lessons }: { lessons: any }) {
+export default function LessonsSection({ lessons, loading }: { lessons: any, loading: boolean }) {
   const [dayOfWeek, setDayOfWeek] = useState("");
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function LessonsSection({ lessons }: { lessons: any }) {
     setDayOfWeek(date.toLocaleDateString("en-US", options));
   }, []);
 
-  if (lessons.length > 0) {
+  if (lessons.length > 0 && !loading) {
     return (
       <div className="h-screen bg-gradient-to-b from-white to-blue-100 py-6 flex flex-col -mb-12">
         <LessonsHeader />

@@ -1,8 +1,3 @@
-const people = [
-  { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
-  // More people...
-]
-
 export default function LessonsTable({ lessons }: { lessons: any }) {
   return (
     <div className="w-full px-4">
