@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import {
   Mic,
   Volume2,
   VolumeX,
   ArrowLeft,
   MoreVertical,
-  Snail,
-  Languages,
-  RotateCw,
+  Globe2,
+  Trophy,
+  Lightbulb,
 } from "lucide-react";
 import { useAudio } from "@/hooks/useAudio";
 import { useChat } from "@/hooks/useChat";
@@ -32,6 +32,23 @@ export default function ChatBody() {
   } = useAudio();
 
   const { messages, messagesEndRef, addMessage } = useChat();
+
+  const [expandedDetails, setExpandedDetails] = useState<{
+    [key: string]: { translation?: boolean; score?: boolean; tips?: boolean };
+  }>({});
+
+  const toggleDetail = (
+    messageId: string,
+    detail: "translation" | "score" | "tips"
+  ) => {
+    setExpandedDetails((prev) => ({
+      ...prev,
+      [messageId]: {
+        ...prev[messageId],
+        [detail]: !prev[messageId]?.[detail],
+      },
+    }));
+  };
 
   const handleTimeLimit = useCallback(() => {
     console.log("Time limit reached!");
@@ -221,48 +238,89 @@ export default function ChatBody() {
                 <div className="text-base">{message.text}</div>
                 {message.speaker === "Emma" && (
                   <>
-                    {message.translation && (
-                      <div className="text-sm text-gray-500 mt-2 italic">
-                        {message.translation}
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex space-x-2">
+                        {message.translation && (
+                          <button
+                            onClick={() =>
+                              toggleDetail(message.id, "translation")
+                            }
+                            className={`w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center ${
+                              expandedDetails[message.id]?.translation
+                                ? "bg-gray-200"
+                                : ""
+                            }`}
+                            title="Translation"
+                          >
+                            <Globe2 className="w-4 h-4 text-gray-600" />
+                          </button>
+                        )}
+                        {(message.language_tip ||
+                          message.language_compliment) && (
+                          <button
+                            onClick={() => toggleDetail(message.id, "tips")}
+                            className={`w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center ${
+                              expandedDetails[message.id]?.tips
+                                ? "bg-gray-200"
+                                : ""
+                            }`}
+                            title="Tips & Compliments"
+                          >
+                            <Lightbulb className="w-4 h-4 text-gray-600" />
+                          </button>
+                        )}
+                        {message.score !== undefined && (
+                          <button
+                            onClick={() => toggleDetail(message.id, "score")}
+                            className={`w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center ${
+                              expandedDetails[message.id]?.score
+                                ? "bg-gray-200"
+                                : ""
+                            }`}
+                            title="Score"
+                          >
+                            <Trophy className="w-4 h-4 text-gray-600" />
+                          </button>
+                        )}
                       </div>
-                    )}
-                    {message.language_tip && (
-                      <div className="text-sm text-blue-600 mt-2">
-                        💡 {message.language_tip}
-                      </div>
-                    )}
-                    {message.language_compliment && (
-                      <div className="text-sm text-green-600 mt-2">
-                        ⭐ {message.language_compliment}
-                      </div>
-                    )}
-                    {message.score !== undefined && (
-                      <div className="text-sm text-gray-500 mt-2">
-                        Score: {message.score}/100
-                      </div>
+                      <span className="text-xs text-gray-700">
+                        {new Date(message.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+
+                    {/* Expandable Content */}
+                    {expandedDetails[message.id]?.translation &&
+                      message.translation && (
+                        <div className="text-sm text-gray-500 mt-2 italic">
+                          {message.translation}
+                        </div>
+                      )}
+                    {expandedDetails[message.id]?.score &&
+                      message.score !== undefined && (
+                        <div className="text-sm text-gray-500 mt-2">
+                          Score: {message.score}/100
+                        </div>
+                      )}
+                    {expandedDetails[message.id]?.tips && (
+                      <>
+                        {message.language_tip && (
+                          <div className="text-sm text-blue-600 mt-2">
+                            💡 {message.language_tip}
+                          </div>
+                        )}
+                        {message.language_compliment && (
+                          <div className="text-sm text-green-600 mt-2">
+                            ⭐ {message.language_compliment}
+                          </div>
+                        )}
+                      </>
                     )}
                   </>
                 )}
-                {/* Action Buttons */}
-                <div className="flex items-center justify-between mt-2">
-                  <div className="flex space-x-2">
-                    <button className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center">
-                      <Languages className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center">
-                      <RotateCw className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center">
-                      <Snail className="w-4 h-4 text-gray-600" />
-                    </button>
-                  </div>
-                  <span className="text-xs text-gray-700">
-                    {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
               </div>
             </div>
           ))}
