@@ -1,9 +1,17 @@
 // src/services/api.ts
-export const fetchAIResponse = async (message: string, roleplay?: any) => {
+export const fetchAIResponse = async (
+  message: string,
+  roleplay?: any,
+  preferences = {
+    nativeLanguage: "Portuguese",
+    learningLanguage: "English",
+    proficiencyLevel: "beginner",
+  }
+) => {
   const response = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, roleplay }),
+    body: JSON.stringify({ message, roleplay, preferences }),
   });
 
   if (!response.ok) throw new Error("Failed to get AI response");

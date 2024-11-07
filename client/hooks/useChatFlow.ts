@@ -1,6 +1,7 @@
 // src/hooks/useChatFlow.ts
 import { useCallback } from "react";
 import { fetchAIResponse } from "@/services/api";
+import { useSearchParams } from "next/navigation";
 
 export const useChatFlow = (
   addMessage: (
@@ -14,13 +15,19 @@ export const useChatFlow = (
   setAudioState: (state: any) => void,
   playAudio: (text: string) => Promise<void>
 ) => {
+  const searchParams = useSearchParams();
+  const roleplayParam = searchParams.get("roleplay");
+  const roleplay = roleplayParam
+    ? JSON.parse(decodeURIComponent(roleplayParam))
+    : null;
+
   const handleChatFlow = useCallback(
     async (userMessage: string) => {
       await addMessage(userMessage, "You");
 
       setAudioState((prev) => ({ ...prev, isProcessing: true }));
       try {
-        const data = await fetchAIResponse(userMessage);
+        const data = await fetchAIResponse(userMessage, roleplay);
         await addMessage(
           data.text,
           "Emma",
@@ -41,7 +48,7 @@ export const useChatFlow = (
         setAudioState((prev) => ({ ...prev, isProcessing: false }));
       }
     },
-    [addMessage, setAudioState, playAudio]
+    [addMessage, setAudioState, playAudio, roleplay]
   );
 
   return { handleChatFlow };

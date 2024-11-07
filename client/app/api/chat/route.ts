@@ -86,14 +86,23 @@ export async function POST(request: Request) {
       );
     }
 
+    const systemPrompt = roleplay
+      ? generateRoleplayPrompt(roleplay, preferences)
+      : generateSystemPrompt(preferences);
+
+    console.log("Complete Prompt:", {
+      systemPrompt,
+      userMessage: message,
+      responseStructure,
+      model: "gpt-3.5-turbo",
+    });
+
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: roleplay
-            ? generateRoleplayPrompt(roleplay, preferences)
-            : generateSystemPrompt(preferences),
+          content: systemPrompt,
         },
         {
           role: "user",
