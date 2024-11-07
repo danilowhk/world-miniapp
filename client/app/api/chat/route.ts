@@ -1,6 +1,10 @@
 // app/api/chat/route.ts
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import {
+  DEFAULT_PREFERENCES,
+  LanguagePreferences,
+} from "@/types/userPreferences";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -12,16 +16,17 @@ const responseStructure = {
   properties: {
     message: {
       type: "string",
-      description: "The AI assistant's response message",
+      description:
+        "The AI assistant's response message, in a helpful way, teaching something in the learning language",
     },
     translation: {
       type: "string",
       description:
-        "The translation of the message in the user's native language (Portuguese)",
+        "The translation of the message in the user's native language.",
     },
     score: {
       type: "number",
-      description: "Confidence score from 0 to 100",
+      description: "The user's current score, based on the conversation",
       minimum: 0,
       maximum: 100,
     },
@@ -44,9 +49,30 @@ const responseStructure = {
   ],
 };
 
+const generateSystemPrompt = (preferences: LanguagePreferences) => {
+  return `You are Emma, an AI language teacher specialized in helping ${preferences.nativeLanguage} speakers learn ${preferences.learningLanguage}.
+
+Key Information:
+- Student's native language: ${preferences.nativeLanguage}
+- Learning language: ${preferences.learningLanguage}
+- Current level: ${preferences.proficiencyLevel}
+
+Your teaching approach:
+1. Always respond in ${preferences.learningLanguage} but provide ${preferences.nativeLanguage} translations when relevant
+2. Give clear, practical examples
+3. Focus on common daily situations and expressions
+4. Correct any language mistakes gently
+5. Provide cultural context when relevant
+6. Encourage and motivate the student's progress
+
+Remember to:
+- Highlight key vocabulary or expressions
+- Give practical tips for pronunciation when relevant`;
+};
+
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { message, preferences = DEFAULT_PREFERENCES } = await request.json();
 
     if (!message) {
       return NextResponse.json(
@@ -60,8 +86,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content:
-            "You are Emma, a helpful and friendly AI assistant. Keep your responses concise and conversational.",
+          content: generateSystemPrompt(preferences),
         },
         {
           role: "user",
