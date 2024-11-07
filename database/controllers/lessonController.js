@@ -20,11 +20,11 @@ const listLessons = async (_, res) => {
   }
 };
 
-const listLessonsByUserId = async (req, res) => {
-  const { userId } = req.body;
+const listLessonsByUserSub = async (req, res) => {
+  const { sub } = req.body;
   
   try {
-    const lessons = await Lesson.find({ userId });
+    const lessons = await Lesson.find({ userAuthSub: sub });
     res.status(200).json(lessons);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -77,4 +77,4 @@ const addMessageToLesson = async (req, res) => {
   }
 };
 
-module.exports = { createLesson, listLessons, listLessonsByUserId, findLessonById, addMessageToLesson };
+module.exports = { createLesson, listLessons, listLessonsByUserSub, findLessonById, addMessageToLesson };
