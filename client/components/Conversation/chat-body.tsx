@@ -41,13 +41,21 @@ export default function ChatBody() {
     messageId: string,
     detail: "translation" | "score" | "tips"
   ) => {
-    setExpandedDetails((prev) => ({
-      ...prev,
-      [messageId]: {
-        ...prev[messageId],
-        [detail]: !prev[messageId]?.[detail],
-      },
-    }));
+    setExpandedDetails((prev) => {
+      const newDetails = { ...prev };
+
+      // Reset all details for the current message
+      newDetails[messageId] = {
+        translation: false,
+        score: false,
+        tips: false,
+      };
+
+      // Toggle the selected detail
+      newDetails[messageId][detail] = !prev[messageId]?.[detail];
+
+      return newDetails;
+    });
   };
 
   const handleTimeLimit = useCallback(() => {
