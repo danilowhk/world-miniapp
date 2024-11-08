@@ -7,7 +7,6 @@ import {
 import { useWaitForTransactionReceipt } from "@worldcoin/minikit-react";
 import { createPublicClient, http, PublicClient } from "viem";
 import { worldchain } from "viem/chains";
-import TestABI from "../../abi/Test.json";
 import { Gift, CheckCircle, Loader2 } from "lucide-react";
 
 export default function PayTransactionPage() {
@@ -22,7 +21,7 @@ export default function PayTransactionPage() {
     useWaitForTransactionReceipt({
       client: client as PublicClient,
       appConfig: {
-        app_id: "app_5163d7ca23d0d3931c0d5930134a9a4d",
+        app_id: "app_9f7e4bd464626c40bc401ef7cd307f7c",
       },
       transactionId: transactionId,
     });
@@ -99,7 +98,7 @@ export default function PayTransactionPage() {
             Confirming...
           </>
         ) : (
-          "Send Transaction"
+          "Mint"
         )}
       </button>
 

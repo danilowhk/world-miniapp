@@ -53,10 +53,13 @@ export const useTimer = (limitInSeconds: number, onTimeLimit: () => void) => {
   }, [isActive, limitInSeconds, onTimeLimit, stopTimer]);
 
   const formatTime = useCallback(() => {
+    if (time >= limitInSeconds) {
+      return "Session Finished";
+    }
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }, [time]);
+  }, [time, limitInSeconds]);
 
   return {
     time,

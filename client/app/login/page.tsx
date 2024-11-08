@@ -46,6 +46,7 @@ export default function LoginPage() {
     });
     console.log("generateMessageResult", generateMessageResult);
     console.log("address ", MiniKit.walletAddress);
+    router.push("/onboarding/language");
   };
 
   const handleLogin = () => {

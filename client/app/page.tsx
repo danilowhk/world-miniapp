@@ -4,16 +4,27 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Settings, Coins, Book, Target, TrendingUp } from "lucide-react";
 import PayTransactionPage from "@/components/SendTransaction";
+import { createPublicClient, http, formatEther } from "viem";
+import { worldchain } from "viem/chains";
 
 export default function Home() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [coinBalance] = useState(150);
+  const [coinBalance, setCoinBalance] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState({
     hours: 23,
     minutes: 45,
     seconds: 30,
   });
+
+  // Create the client (you might want to move this outside the component)
+  const client = createPublicClient({
+    chain: worldchain,
+    transport: http("https://worldchain-mainnet.g.alchemy.com/public"),
+  });
+
+  const ADDRESS = "0xb9cadf86209a6cc50ddaa0a7e8cfdec7f2f89586";
+  const TOKEN_ADDRESS = "0xA0C794A7896285c893385B18E8BaF4F0eB87C836";
 
   useEffect(() => {
     setMounted(true);
@@ -21,6 +32,31 @@ export default function Home() {
 
   useEffect(() => {
     if (!mounted) return;
+
+    const fetchBalance = async () => {
+      try {
+        const balance = await client.readContract({
+          address: TOKEN_ADDRESS,
+          abi: [
+            {
+              type: "function",
+              name: "balanceOf",
+              inputs: [{ name: "account", type: "address" }],
+              outputs: [{ name: "", type: "uint256" }],
+              stateMutability: "view",
+            },
+          ],
+          functionName: "balanceOf",
+          args: [ADDRESS],
+        });
+
+        setCoinBalance(Number(formatEther(balance)));
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+      }
+    };
+
+    fetchBalance();
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -86,9 +122,9 @@ export default function Home() {
             <Coins size={24} />
             <span className="text-2xl font-bold">{coinBalance}</span>
           </div>
-          <button className="px-4 py-2 bg-white text-orange-500 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors">
+          {/* <button className="px-4 py-2 bg-white text-orange-500 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors">
             Claim Tokens
-          </button>
+          </button> */}
         </div>
         <div className="space-y-2">
           <p className="text-sm text-yellow-100">Next reward in:</p>

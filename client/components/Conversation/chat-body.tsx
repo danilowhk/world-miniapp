@@ -52,13 +52,17 @@ export default function ChatBody() {
 
   const handleTimeLimit = useCallback(() => {
     console.log("Time limit reached!");
+    
+    // Add a session finished message
+    addMessage("Session finished! Thank you for practicing. Check your performance summary below.", "Emma");
+    
     // Create conversation summary
     const conversationData = {
       id: Date.now().toString(),
       messages,
       startTime: messages[0]?.timestamp || new Date().toISOString(),
       endTime: new Date().toISOString(),
-      duration: 600,
+      duration: 10,
       totalMessages: messages.length,
       userMessages: messages.filter((m) => m.speaker === "You").length,
       assistantMessages: messages.filter((m) => m.speaker === "Emma").length,
@@ -78,11 +82,10 @@ export default function ChatBody() {
     });
     console.log("=== End of Conversation ===\n");
 
-    alert("Time limit reached! Check console for conversation data.");
-  }, [messages]);
+  }, [messages, addMessage]);
 
   const { formatTime, startTimer, stopTimer, resetTimer, isActive, time } =
-    useTimer(600, handleTimeLimit);
+    useTimer(10, handleTimeLimit);
 
   const { handleChatFlow } = useChatFlow(
     async (
@@ -150,6 +153,8 @@ export default function ChatBody() {
         await addMessage(welcomeMessage, "Emma");
         await playAudio(welcomeMessage);
         startTimer();
+      } else {
+        startTimer();
       }
 
       isInitialized = true;
@@ -160,7 +165,7 @@ export default function ChatBody() {
     return () => {
       isInitialized = false;
     };
-  }, []); // Empty dependency array since we want this to run only once
+  }, [startTimer, messages.length]);
 
   useEffect(() => {
     const element = messagesEndRef.current;
