@@ -52,7 +52,7 @@ export default function LoginPage() {
     if (!MiniKit.isInstalled()) {
       console.error("MiniKit not installed");
       return;
-    };
+    }
     MiniKit.commands.verify(verifyPayload);
 
     console.log(verifyPayload);
@@ -110,7 +110,7 @@ export default function LoginPage() {
 
     MiniKit.subscribe(ResponseEvent.MiniAppWalletAuth, async (payload) => {
       if (payload.status === "error") {
-        return
+        return;
       } else {
         const response = await fetch("/api/complete-siwe", {
           method: "POST",
@@ -132,16 +132,28 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="relative flex flex-col h-screen bg-gray-800 text-white">
-      <section className="flex-grow flex items-center justify-center">
-        <h1 className="text-4xl font-bold text-center">Welcome to the App</h1>
+    <main className="relative flex flex-col h-screen bg-gray-800 text-white overflow-hidden font-roboto">
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute w-full h-full object-cover"
+      >
+        <source src="/people3.mp4" type="video/mp4" />
+      </video>
+
+      <div className="absolute inset-0 bg-black bg-opacity-50" />
+
+      <section className="flex-grow flex items-center justify-center relative z-10">
+        <h1 className="text-6xl font-bold text-center">Welcome to Learning</h1>
       </section>
 
-      <section className="absolute bottom-0 w-full h-1/3 bg-white rounded-t-3xl p-6 flex flex-col items-center justify-center text-gray-900">
-        <p className="text-center text-lg mb-4">Start your journey today!</p>
+      <section className="relative z-10 w-full h-1/3 bg-white rounded-t-3xl p-6 flex flex-col items-center justify-center text-gray-900">
+        <p className="text-center text-xl mb-4">Start your journey today!</p>
         <button
           onClick={signInWithWallet}
-          className="bg-blue-500 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:bg-blue-600 transition mb-4"
+          className="bg-black text-white font-semibold text-lg py-3 px-8 rounded-lg shadow-md hover:bg-gray-800 transition mb-4"
         >
           Sign In with World ID
         </button>
@@ -150,7 +162,7 @@ export default function LoginPage() {
             localStorage.setItem("isLoggedIn", "true");
             router.push("/onboarding/language");
           }}
-          className="text-gray-600 hover:text-gray-800 transition"
+          className="text-gray-600 hover:text-gray-800 transition text-lg"
         >
           Skip for now
         </button>
